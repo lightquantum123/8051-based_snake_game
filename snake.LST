@@ -1,0 +1,228 @@
+C51 COMPILER V9.01   SNAKE                                                                 07/17/2014 17:50:15 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE SNAKE
+OBJECT MODULE PLACED IN snake.OBJ
+COMPILER INVOKED BY: d:\Keil\C51\BIN\C51.EXE snake.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          /*
+   2           * snake.c
+   3           *
+   4           *  Created on: 2014年7月16日
+   5           *      Author: Marvin 蒋子缘
+   6           */
+   7          #include "dlinkedlist.h"
+   8          #include "snake.h"
+   9          #include<stdlib.h>
+  10          
+  11          static unsigned char food[2]={1,1};
+  12          static pdbNode head=NULL;
+  13          void initializeGame()
+  14          {
+  15   1      //游戏初始化
+  16   1      food[0]=1;
+  17   1      food[1]=1;
+  18   1      head=createList();
+  19   1      insertNode(head,createNode(6,6));
+  20   1      insertNode(head,createNode(7,6));
+  21   1      }
+  22          
+  23          void endGame()
+  24          {
+  25   1      free(deleteList(head));
+  26   1      }
+  27          
+  28          unsigned char validateCoordinate(char x)
+  29          {
+  30   1      //修正坐标，使能从上边转至下边
+  31   1      if(x>=0)
+  32   1      {
+  33   2      return x%16;
+  34   2      }else
+  35   1      {
+  36   2      return x%16+16;
+  37   2      }
+  38   1      }
+  39          
+  40          unsigned char currentDir()
+  41          {
+  42   1      //返回当前行进方向
+  43   1      //0 up，1 down ，2 left，3 right
+  44   1      pdbNode first=head->right;
+  45   1      pdbNode second=first->right;
+  46   1      char diffX=(char)(first->x)-second->x;
+  47   1      char diffY=(char)(first->y)-second->y;
+  48   1      if(diffY<0)
+  49   1      {
+  50   2       if(diffY==-1)
+  51   2        return 0;
+  52   2       else
+  53   2        return 1;
+  54   2      }
+  55   1      if(diffY>0)
+C51 COMPILER V9.01   SNAKE                                                                 07/17/2014 17:50:15 PAGE 2   
+
+  56   1      {
+  57   2       if(diffY==1)
+  58   2        return 1;
+  59   2       else
+  60   2        return 0;
+  61   2      }
+  62   1      if(diffX<0)
+  63   1      {
+  64   2       if(diffX==-1)
+  65   2        return 2;
+  66   2       else
+  67   2        return 3;
+  68   2      }
+  69   1      if(diffX>0)
+  70   1      {
+  71   2       if(diffX==1)
+  72   2        return 3;
+  73   2       else
+  74   2        return 2;
+  75   2      }
+  76   1      }
+  77          
+  78          unsigned char move(unsigned char dir)
+  79          {
+  80   1      //移动蛇的函数
+  81   1      unsigned char preDir=currentDir();
+  82   1      pdbNode first=head->right;
+  83   1      pdbNode second=first->right;
+  84   1      pdbNode temp=createNode(255,255);
+  85   1      insertNode(head,temp);
+  86   1      //0 up，1 down ，2 left，3 right
+  87   1      switch(dir)
+  88   1      {
+  89   2      case 0:
+  90   2        if(preDir!=1)
+  91   2        {
+  92   3        temp->x=first->x;
+  93   3        temp->y=validateCoordinate(-1+first->y);
+  94   3        }else{
+  95   3          temp->x=first->x;
+  96   3          temp->y=validateCoordinate(first->y+1);
+  97   3        }
+  98   2      break;
+  99   2      case 1:
+ 100   2        if(preDir!=0)
+ 101   2        {
+ 102   3        temp->x=first->x;
+ 103   3        temp->y=validateCoordinate(first->y+1);
+ 104   3        }else
+ 105   2        {
+ 106   3        temp->x=first->x;
+ 107   3        temp->y=validateCoordinate(-1+first->y);
+ 108   3        }
+ 109   2      break;
+ 110   2      case 2:
+ 111   2        if(preDir!=3)
+ 112   2        {
+ 113   3        temp->x=validateCoordinate(-1+first->x);
+ 114   3        temp->y=first->y;
+ 115   3        }else
+ 116   2        {
+ 117   3        temp->x=validateCoordinate(first->x+1);
+C51 COMPILER V9.01   SNAKE                                                                 07/17/2014 17:50:15 PAGE 3   
+
+ 118   3        temp->y=first->y;
+ 119   3        }
+ 120   2      break;
+ 121   2      case 3:
+ 122   2        if(preDir!=2)
+ 123   2        {
+ 124   3        temp->x=validateCoordinate(first->x+1);
+ 125   3        temp->y=first->y;
+ 126   3        }else
+ 127   2        {
+ 128   3        temp->x=validateCoordinate(-1+first->x);
+ 129   3        temp->y=first->y;
+ 130   3        }
+ 131   2      break;
+ 132   2      }
+ 133   1      
+ 134   1      //checking collision with the food. If not, delete the last node.
+ 135   1      if(temp->x!=food[0]||temp->y!=food[1])
+ 136   1      {
+ 137   2      free(removeNode(head));
+ 138   2      }else
+ 139   1      {
+ 140   2              food[0]=rand()%16;
+ 141   2              food[1]=rand()%16;
+ 142   2      }
+ 143   1      
+ 144   1      //checking collision with itself to tell the main program if the game end.
+ 145   1      if(searchCollision(head))
+ 146   1        return 0;
+ 147   1      else
+ 148   1        return 1;
+ 149   1      }
+ 150          
+ 151          unsigned char* displayArray()
+ 152          {
+ 153   1      //返回可供显示的数组
+ 154   1      pdbNode iterator=head->right;
+ 155   1      unsigned char i=0;
+ 156   1      unsigned char* display=NULL;
+ 157   1      unsigned char m,n,temp;
+ 158   1      display=(unsigned char*)malloc(32*sizeof(unsigned char));
+ 159   1      for(i=0;i<32;++i)
+ 160   1      {
+ 161   2        display[i]=0;
+ 162   2      }
+ 163   1      
+ 164   1      for(iterator=head->right;(iterator->x!=255);iterator=iterator->right)
+ 165   1      {
+ 166   2        m=iterator->x;
+ 167   2        n=iterator->y;
+ 168   2        if(m<8)
+ 169   2        {
+ 170   3        temp=1;
+ 171   3        temp=temp<<m;
+ 172   3        display[n*2]=temp|display[n*2];
+ 173   3        //printf("%x",display[n*2]);
+ 174   3        }else
+ 175   2        {
+ 176   3        temp=1;
+ 177   3        temp=temp<<(m%8);
+ 178   3        display[n*2+1]=temp|display[n*2+1];
+ 179   3        //printf("%x",display[n*2+1]);
+C51 COMPILER V9.01   SNAKE                                                                 07/17/2014 17:50:15 PAGE 4   
+
+ 180   3        }
+ 181   2      }
+ 182   1        m=food[0];
+ 183   1        n=food[1];
+ 184   1        if(m<8)
+ 185   1        {
+ 186   2        temp=1;
+ 187   2        temp=temp<<m;
+ 188   2        display[n*2]=temp|display[n*2];
+ 189   2        }else
+ 190   1        {
+ 191   2        temp=1;
+ 192   2        temp=temp<<(m%8);
+ 193   2        display[n*2+1]=temp|display[n*2+1];
+ 194   2        }
+ 195   1      
+ 196   1      return display;
+ 197   1      }
+ 198          
+*** WARNING C291 IN LINE 76 OF SNAKE.C: not every exit path returns a value
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1078    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      5      26
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,115 @@
+C51 COMPILER V9.01   DILINKEDLIST                                                          07/17/2014 17:50:14 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE DILINKEDLIST
+OBJECT MODULE PLACED IN dilinkedlist.OBJ
+COMPILER INVOKED BY: d:\Keil\C51\BIN\C51.EXE dilinkedlist.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          /*
+   2           * dilinkedlist.c
+   3           *
+   4           *  Created on: 2014Äê7ÔÂ16ÈÕ
+   5           *      Author: Marvin ½¯×ÓÔµ
+   6           */
+   7          #include <stdlib.h>
+   8          #include "dlinkedlist.h"
+   9          //´´½¨½áµã
+  10          pdbNode createNode(unsigned char m,unsigned char n)
+  11          {
+  12   1      pdbNode pnode = (pdbNode)malloc(sizeof(DbNode));
+  13   1      pnode->x = m;
+  14   1      pnode->y = n;
+  15   1      pnode->left = pnode->right = pnode;    //´´½¨ÐÂ½áµãÊ±£¬ÈÃÆäÇ°ÇýºÍºó¼ÌÖ¸Õë¶¼Ö¸Ïò×ÔÉí
+  16   1      
+  17   1      return pnode;
+  18   1      }
+  19          
+  20          //=========================================================================
+  21          //´´½¨Á´±í
+  22          pdbNode createList() //²ÎÊý¸ø³ö±íÍ·½áµãÊý¾Ý £¨±íÍ·½áµã²»×÷Îª´æ·ÅÓÐÒâÒåÊý¾ÝµÄ½áµã£©
+  23          {
+  24   1      pdbNode pnode = (pdbNode)malloc(sizeof(DbNode));
+  25   1      pnode->x = 255;
+  26   1      pnode->y = 255;
+  27   1      pnode->left = pnode->right = pnode;
+  28   1      
+  29   1      return pnode;
+  30   1      }
+  31          
+  32          //²åÈëÐÂ½áµã,×ÜÊÇÔÚ±íÍ·²åÈë; ·µ»Ø±íÍ·½áµã
+  33          pdbNode insertNode(pdbNode h,pdbNode pnode) // ²ÎÊý1ÊÇÁ´±íµÄ±íÍ·½áµã£¬²ÎÊý2ÊÇÒª²åÈëµÄ½áµã£¨½áµãÊý¾ÝÎªdata£
+             -©
+  34          {
+  35   1      pdbNode ptmp = h->right;
+  36   1      
+  37   1      // ´Ó×óµ½ÓÒ»Ö¸´Á´½Ó
+  38   1      h->right = pnode;
+  39   1      pnode->right = ptmp;
+  40   1      
+  41   1      // ´ÓÓÒµ½×ó»Ö¸´Á´½Ó
+  42   1      ptmp->left = pnode;
+  43   1      pnode->left = h;
+  44   1      
+  45   1      return h;
+  46   1      }
+  47          
+  48          pdbNode removeNode(pdbNode h)//´Ó±íÎ²ÒÆ³ý½Úµã
+  49          {
+  50   1      pdbNode ptmp = h->left;
+  51   1      h->left=ptmp->left;
+  52   1      ptmp->left->right=h;
+  53   1      ptmp->left=ptmp->right=ptmp;
+  54   1      return ptmp;
+C51 COMPILER V9.01   DILINKEDLIST                                                          07/17/2014 17:50:14 PAGE 2   
+
+  55   1      }
+  56          
+  57          //¼ì²éÊÇ·ñÓÐºÍµÚÒ»¸ö½ÚµãÊý¾ÝÒ»ÑùµÄ½Úµã£¬ÓÐÔò·µ»Ø1£¬·ñÔò·µ»Ø0
+  58          unsigned char searchCollision(pdbNode h) // ²ÎÊý1ÊÇÁ´±íµÄ±íÍ·½áµã
+  59          {
+  60   1      pdbNode pnode0 = h->right;
+  61   1      pdbNode pnode = h->right->right;
+  62   1      while (pnode!= h)
+  63   1      {
+  64   2      if((pnode->x==pnode0->x)&&(pnode->y==pnode0->y))break;
+  65   2      pnode = pnode->right;
+  66   2      }
+  67   1      
+  68   1      if (pnode == h) return 0;
+  69   1      else
+  70   1      return 1;
+  71   1      }
+  72          
+  73          //delete all nodes
+  74          pdbNode deleteList(pdbNode h)
+  75          {
+  76   1      pdbNode pnode=h->right;
+  77   1      pdbNode ptmp=h->right;
+  78   1      while(pnode!=h)
+  79   1      {
+  80   2      ptmp=pnode;
+  81   2      pnode=pnode->right;
+  82   2      free(ptmp);
+  83   2      }
+  84   1      h->right=h->left=h;
+  85   1      return h;
+  86   1      }
+  87          
+  88          
+  89          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    667    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----      41
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
